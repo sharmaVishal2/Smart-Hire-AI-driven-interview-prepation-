@@ -1,71 +1,42 @@
-import { LogOut, Sparkles, History } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth0 } from '@auth0/auth0-react';
+import { BrainCircuit, FileUp, History, LayoutDashboard, LogOut } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext.jsx';
 
-function AppShell({ title, subtitle, children }) {
-  const { logout, user } = useAuth0();
-  const location = useLocation();
+const links = [
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/upload', label: 'Resume', icon: FileUp },
+  { to: '/interview', label: 'Interview', icon: BrainCircuit },
+  { to: '/history', label: 'History', icon: History },
+];
 
+export default function AppShell({ children }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-grid bg-[size:42px_42px]">
-      <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
-        <header className="mb-8 rounded-3xl border border-white/10 bg-white/5 px-6 py-5 shadow-glow backdrop-blur">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="flex items-center gap-3">
-                <div className="rounded-2xl bg-accent/15 p-3 text-accent">
-                  <Sparkles className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="font-display text-2xl font-bold text-white">Smart Career Assistant</p>
-                  <p className="text-sm text-slate-300">{subtitle}</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              <nav className="flex items-center gap-2 rounded-full border border-white/10 bg-slate-900/70 p-2">
-                <Link
-                  to="/dashboard"
-                  className={`rounded-full px-4 py-2 text-sm font-semibold ${
-                    location.pathname === '/dashboard' ? 'bg-accent text-ink' : 'text-slate-300'
-                  }`}
-                >
-                  Workspace
-                </Link>
-                <Link
-                  to="/history"
-                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
-                    location.pathname === '/history' ? 'bg-accent text-ink' : 'text-slate-300'
-                  }`}
-                >
-                  <History className="h-4 w-4" />
-                  History
-                </Link>
-              </nav>
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-white">{user?.name}</p>
-                  <p className="text-xs text-slate-400">{user?.email}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="mt-5">
-            <h1 className="font-display text-3xl font-bold text-white">{title}</h1>
-          </div>
+    <div className="min-h-screen bg-[#f6f8fb]">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-slate-200 bg-white px-4 py-5 lg:block">
+        <div className="mb-8">
+          <div className="text-xl font-extrabold text-slate-950">SmartHire</div>
+          <div className="text-sm text-slate-500">AI interview platform</div>
+        </div>
+        <nav className="space-y-1">
+          {links.map(({ to, label, icon: Icon }) => (
+            <NavLink key={to} to={to} className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold ${isActive ? 'bg-teal-50 text-teal-700' : 'text-slate-600 hover:bg-slate-100'}`}>
+              <Icon size={18} /> {label}
+            </NavLink>
+          ))}
+        </nav>
+        <button className="absolute bottom-5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onClick={() => { logout(); navigate('/'); }}>
+          <LogOut size={18} /> Logout
+        </button>
+      </aside>
+      <main className="lg:pl-64">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white/95 px-5 py-4">
+          <div className="font-bold text-slate-950">SmartHire</div>
+          <div className="text-sm text-slate-500">{user?.name}</div>
         </header>
-        <main className="flex-1">{children}</main>
-      </div>
+        <div className="mx-auto max-w-6xl px-5 py-6">{children}</div>
+      </main>
     </div>
   );
 }
-
-export default AppShell;

@@ -1,16 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  color: #e8f0ff;
-  background:
-    radial-gradient(circle at top left, rgba(65, 209, 183, 0.18), transparent 35%),
-    radial-gradient(circle at top right, rgba(245, 190, 95, 0.12), transparent 24%),
-    #08111f;
-  font-family: 'Manrope', sans-serif;
+  color: #172033;
+  background: #f6f8fb;
+  font-family: Inter, system-ui, sans-serif;
 }
 
 body {
@@ -21,4 +18,8 @@ body {
 
 #root {
   min-height: 100vh;
+}
+
+button, input, textarea {
+  font: inherit;
 }

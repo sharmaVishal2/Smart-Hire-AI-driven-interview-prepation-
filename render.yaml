@@ -7,12 +7,14 @@ services:
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
     envVars:
-      - key: MONGODB_URI
+      - key: DATABASE_URL
         sync: false
-      - key: AUTH0_ISSUER_URI
-        value: https://sharmavishal1.us.auth0.com/
-      - key: AUTH0_AUDIENCE
-        value: https://smart-career-assistant-api
+      - key: DATABASE_USERNAME
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
       - key: FRONTEND_URL
         sync: false
       - key: GROQ_API_KEY

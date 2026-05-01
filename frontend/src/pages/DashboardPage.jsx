@@ -1,153 +1,44 @@
-import { useState } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
-import { Save, Sparkles } from 'lucide-react';
-import AppShell from '../components/AppShell';
-import LoadingSpinner from '../components/LoadingSpinner';
-import ResultPanel from '../components/ResultPanel';
-import { generateContent, saveHistory } from '../api/client';
-import useApiAuth from '../hooks/useApiAuth';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import AppShell from '../components/AppShell.jsx';
+import StatCard from '../components/StatCard.jsx';
+import { dashboardStats, interviewHistory } from '../api/client.js';
+import { formatDate } from '../utils/date.js';
 
-const initialForm = {
-  jobDescription: '',
-  skills: '',
-};
+export default function DashboardPage() {
+  const [stats, setStats] = useState({ interviews: 0, completed: 0, averageScore: 0 });
+  const [recent, setRecent] = useState([]);
 
-function DashboardPage() {
-  const { user } = useAuth0();
-  const [formData, setFormData] = useState(initialForm);
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [saveMessage, setSaveMessage] = useState('');
-
-  useApiAuth();
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((current) => ({ ...current, [name]: value }));
-  };
-
-  const handleGenerate = async (event) => {
-    event.preventDefault();
-    setLoading(true);
-    setError('');
-    setSaveMessage('');
-
-    try {
-      const generated = await generateContent(formData);
-      setResult(generated);
-    } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Failed to generate content.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!result) {
-      return;
-    }
-
-    setSaving(true);
-    setSaveMessage('');
-    try {
-      await saveHistory({
-        jobDescription: formData.jobDescription,
-        skills: formData.skills,
-        generatedContent: result,
-      });
-      setSaveMessage('Saved to history.');
-    } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Failed to save history.');
-    } finally {
-      setSaving(false);
-    }
-  };
+  useEffect(() => {
+    Promise.all([dashboardStats(), interviewHistory()]).then(([s, h]) => {
+      setStats(s);
+      setRecent(h.slice(0, 4));
+    });
+  }, []);
 
   return (
-    <AppShell
-      title="Build stronger career documents in minutes"
-      subtitle={`Signed in as ${user?.name || 'career builder'}`}
-    >
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <section className="rounded-3xl border border-white/10 bg-slate-900/65 p-6 backdrop-blur">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="rounded-2xl bg-accent/10 p-3 text-accent">
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="font-display text-2xl font-semibold text-white">Generation Workspace</h2>
-              <p className="text-sm text-slate-400">Paste the target role and current skill set.</p>
-            </div>
-          </div>
-          <form className="space-y-5" onSubmit={handleGenerate}>
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-slate-200">Job Description</span>
-              <textarea
-                name="jobDescription"
-                value={formData.jobDescription}
-                onChange={handleChange}
-                rows="10"
-                placeholder="Paste the role description, responsibilities, and qualifications."
-                className="w-full rounded-3xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-accent"
-                required
-              />
-            </label>
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-slate-200">Candidate Skills</span>
-              <textarea
-                name="skills"
-                value={formData.skills}
-                onChange={handleChange}
-                rows="8"
-                placeholder="List tools, programming languages, achievements, and domain strengths."
-                className="w-full rounded-3xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-accent"
-                required
-              />
-            </label>
-            {error ? <p className="rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</p> : null}
-            {saveMessage ? <p className="rounded-2xl bg-accent/10 px-4 py-3 text-sm text-accent">{saveMessage}</p> : null}
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-ink transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {loading ? 'Generating...' : 'Generate Content'}
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={!result || saving}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Save className="h-4 w-4" />
-                {saving ? 'Saving...' : 'Save to History'}
-              </button>
-            </div>
-          </form>
-        </section>
-        <section>
-          {loading ? (
-            <LoadingSpinner />
-          ) : result ? (
-            <ResultPanel result={result} />
-          ) : (
-            <div className="flex min-h-full items-center justify-center rounded-3xl border border-dashed border-white/10 bg-slate-900/40 p-10 text-center">
-              <div>
-                <p className="font-display text-2xl font-semibold text-white">Your generated content will appear here</p>
-                <p className="mt-3 max-w-lg text-sm leading-7 text-slate-400">
-                  Use the workspace to generate an AI-crafted summary, ATS skill list, project descriptions, and cover
-                  letter tailored to the role.
-                </p>
-              </div>
-            </div>
-          )}
-        </section>
+    <AppShell>
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-950">Dashboard</h1>
+          <p className="mt-1 text-slate-500">Track interview readiness from resume-specific sessions.</p>
+        </div>
+        <Link to="/upload" className="rounded-md bg-teal-600 px-4 py-3 text-center font-bold text-white hover:bg-teal-700">Upload Resume</Link>
       </div>
+      <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <StatCard label="Total interviews" value={stats.interviews} />
+        <StatCard label="Completed" value={stats.completed} />
+        <StatCard label="Average score" value={`${stats.averageScore || 0}%`} />
+      </div>
+      <section className="mt-8 rounded-lg border border-slate-200 bg-white">
+        <div className="border-b border-slate-200 px-5 py-4 font-bold text-slate-950">Recent interviews</div>
+        {recent.length === 0 ? <div className="p-5 text-slate-500">No interviews yet.</div> : recent.map((item) => (
+          <Link key={item.id} to={`/results/${item.id}`} className="flex items-center justify-between border-b border-slate-100 px-5 py-4 hover:bg-slate-50">
+            <span className="font-semibold text-slate-800">{formatDate(item.startedAt)}</span>
+            <span className="text-sm text-slate-500">{item.averageScore ?? 0}%</span>
+          </Link>
+        ))}
+      </section>
     </AppShell>
   );
 }
-
-export default DashboardPage;

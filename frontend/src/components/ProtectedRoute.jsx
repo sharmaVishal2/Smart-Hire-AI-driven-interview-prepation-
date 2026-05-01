@@ -1,19 +1,8 @@
-import { useAuth0 } from '@auth0/auth0-react';
-import { Navigate } from 'react-router-dom';
-import LoadingSpinner from './LoadingSpinner';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext.jsx';
 
-function ProtectedRoute({ children }) {
-  const { isLoading, isAuthenticated } = useAuth0();
-
-  if (isLoading) {
-    return <LoadingSpinner label="Checking your session..." />;
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-
-  return children;
+export default function ProtectedRoute() {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="grid min-h-screen place-items-center text-slate-600">Loading SmartHire...</div>;
+  return user ? <Outlet /> : <Navigate to="/" replace />;
 }
-
-export default ProtectedRoute;

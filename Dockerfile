@@ -9,7 +9,7 @@ RUN mvn -DskipTests package
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-COPY --from=build /app/target/smart-career-assistant-1.0.0.jar app.jar
+COPY --from=build /app/target/smarthire-1.0.0.jar app.jar
 
 EXPOSE 8080
 
