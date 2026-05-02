@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileUp } from 'lucide-react';
 import AppShell from '../components/AppShell.jsx';
-import { createGuestSession, listResumes, startGuestInterview, startInterview, uploadGuestResume, uploadResume } from '../api/client.js';
+import { apiErrorMessage, createGuestSession, listResumes, startGuestInterview, startInterview, uploadGuestResume, uploadResume } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { formatDate } from '../utils/date.js';
 
@@ -20,6 +20,7 @@ export default function UploadPage() {
     if (user) listResumes().then(setResumes);
     else {
       setResumes([]);
+      setMessage('');
       if (!localStorage.getItem('smarthire_guest_session')) {
         createGuestSession().then((session) => {
           localStorage.setItem('smarthire_guest_session', session.sessionId);
@@ -27,6 +28,9 @@ export default function UploadPage() {
           localStorage.setItem('smarthire_guest_used', String(session.usedInterviews));
           localStorage.setItem('smarthire_guest_max', String(session.maxInterviews));
           setGuestReady(true);
+        }).catch((err) => {
+          setGuestReady(false);
+          setMessage(apiErrorMessage(err, 'Could not start guest mode'));
         });
       } else {
         localStorage.setItem('smarthire_mode', 'guest');
@@ -45,7 +49,7 @@ export default function UploadPage() {
       setResumes([resume, ...resumes]);
       setMessage('Resume parsed successfully.');
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Upload failed');
+      setMessage(apiErrorMessage(err, 'Upload failed'));
     } finally {
       setLoading(false);
     }
@@ -61,7 +65,7 @@ export default function UploadPage() {
       }
       navigate(`/interview/${session.interviewId}`, { state: { ...session, mode: isGuest ? 'guest' : 'auth' } });
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Could not start interview');
+      setMessage(apiErrorMessage(err, 'Could not start interview'));
     } finally {
       setLoading(false);
     }

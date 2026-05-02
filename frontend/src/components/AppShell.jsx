@@ -1,4 +1,4 @@
-import { BrainCircuit, FileUp, History, LayoutDashboard, LogOut } from 'lucide-react';
+import { BrainCircuit, FileUp, History, LayoutDashboard, LogIn, LogOut, UserPlus } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
 
@@ -11,7 +11,6 @@ const links = [
 
 export default function AppShell({ children }) {
   const { user, logout } = useAuth();
-  const isGuest = !user && localStorage.getItem('smarthire_mode') === 'guest';
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[#f6f8fb]">
@@ -27,14 +26,32 @@ export default function AppShell({ children }) {
             </NavLink>
           ))}
         </nav>
-        <button className="absolute bottom-5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onClick={() => { logout(); localStorage.removeItem('smarthire_guest_session'); navigate('/'); }}>
-          <LogOut size={18} /> {user ? 'Logout' : 'Exit Guest'}
-        </button>
+        {user && (
+          <button className="absolute bottom-5 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onClick={() => { logout(); localStorage.removeItem('smarthire_guest_session'); navigate('/'); }}>
+            <LogOut size={18} /> Logout
+          </button>
+        )}
       </aside>
       <main className="lg:pl-64">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white/95 px-5 py-4">
           <div className="font-bold text-slate-950">SmartHire</div>
-          <div className="text-sm text-slate-500">{user?.name || (isGuest ? 'Guest mode' : '')}</div>
+          {user ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-slate-500">{user.name}</span>
+              <button className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onClick={() => { logout(); localStorage.removeItem('smarthire_guest_session'); navigate('/'); }}>
+                <LogOut size={16} /> Logout
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button className="flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" onClick={() => navigate('/login')}>
+                <LogIn size={16} /> Login
+              </button>
+              <button className="flex items-center gap-2 rounded-md bg-teal-600 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-700" onClick={() => navigate('/register')}>
+                <UserPlus size={16} /> Register
+              </button>
+            </div>
+          )}
         </header>
         <div className="mx-auto max-w-6xl px-5 py-6">{children}</div>
       </main>

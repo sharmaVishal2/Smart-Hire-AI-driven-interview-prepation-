@@ -1,6 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
-import LandingPage from './pages/LandingPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import UploadPage from './pages/UploadPage.jsx';
@@ -11,8 +10,9 @@ import HistoryPage from './pages/HistoryPage.jsx';
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<UploadPage />} />
+      <Route path="/login" element={<LoginPage initialMode="login" />} />
+      <Route path="/register" element={<LoginPage initialMode="register" />} />
       <Route path="/upload" element={<UploadPage />} />
       <Route path="/interview/:id?" element={<InterviewPage />} />
       <Route path="/results/:id" element={<ResultsPage />} />

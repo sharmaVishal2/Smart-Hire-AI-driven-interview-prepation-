@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+  timeout: 15000,
 });
 
 api.interceptors.request.use((config) => {
@@ -32,6 +33,16 @@ export const interviewHistory = () => api.get('/api/interviews').then((r) => r.d
 export const dashboardStats = () => api.get('/api/interviews/stats').then((r) => r.data);
 
 const guestHeaders = () => ({ 'X-Guest-Session': localStorage.getItem('smarthire_guest_session') });
+
+export const apiErrorMessage = (err, fallback = 'Request failed') => {
+  if (err.code === 'ECONNABORTED') {
+    return 'Backend is not responding. Start the backend or check VITE_API_BASE_URL.';
+  }
+  if (err.message === 'Network Error') {
+    return 'Cannot reach the backend. Start it on http://localhost:8080 or set VITE_API_BASE_URL.';
+  }
+  return err.response?.data?.message || fallback;
+};
 
 export const createGuestSession = () => api.post('/api/guest/sessions').then((r) => r.data);
 export const uploadGuestResume = (file) => {

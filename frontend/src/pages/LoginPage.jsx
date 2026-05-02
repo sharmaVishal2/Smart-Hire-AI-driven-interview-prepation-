@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { BrainCircuit } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext.jsx';
 
-export default function LoginPage() {
-  const [mode, setMode] = useState('login');
+export default function LoginPage({ initialMode = 'login' }) {
+  const [mode, setMode] = useState(initialMode);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,12 @@ export default function LoginPage() {
   return (
     <main className="grid min-h-screen grid-cols-1 bg-white lg:grid-cols-[1fr_440px]">
       <section className="flex min-h-[360px] flex-col justify-between bg-slate-950 p-8 text-white">
-        <div className="flex items-center gap-3 text-xl font-extrabold"><BrainCircuit /> SmartHire</div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 text-xl font-extrabold"><BrainCircuit /> SmartHire</div>
+          <button className="rounded-md border border-white/20 px-3 py-2 text-sm font-semibold text-white hover:bg-white/10" onClick={() => navigate('/upload')}>
+            Use without login
+          </button>
+        </div>
         <div className="max-w-2xl">
           <h1 className="text-4xl font-extrabold leading-tight md:text-6xl">AI Resume Driven Interview Platform</h1>
           <p className="mt-5 max-w-xl text-lg text-slate-300">Upload a resume, generate contextual questions, run a live interview, and review scored feedback.</p>
